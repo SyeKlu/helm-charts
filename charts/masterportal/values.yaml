@@ -61,14 +61,9 @@ masterportal:
       repository: https://github.com/myuser/myapp.git
       branch: main
       path: /git
+      gitSecret: []
 
-    gitSecret:
-      sshKey: sshkey
-      knownHosts: knownHosts
   resources:
-      # limits:
-      #   cpu: 1000m
-      #   memory: 1Gi
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 100m
+      memory: 128Mi

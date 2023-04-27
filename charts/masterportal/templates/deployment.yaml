@@ -30,6 +30,10 @@ spec:
         - name: {{ $fullName }}
           image: "{{ .Values.masterportal.image.registry }}/{{ .Values.masterportal.image.repository }}:{{ .Values.masterportal.image.tag }}"
           imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
+          {{- with .Values.masterportal.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           securityContext:
             {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
           ports:
@@ -41,6 +45,10 @@ spec:
         - name: git-sync
           image: "{{ .Values.masterportal.sidecar.image.registry }}/{{ .Values.masterportal.sidecar.image.repository }}:{{ .Values.masterportal.sidecar.image.tag }}"
           imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
+          {{- with .Values.masterportal.sidecar.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           securityContext:
             {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
           args:
@@ -69,5 +77,3 @@ spec:
           emptyDir: {}
       securityContext:
         fsGroup: 65533
-      imagePullSecrets:
-        - name: {{ $fullName }}-gitlab-pull-secret
