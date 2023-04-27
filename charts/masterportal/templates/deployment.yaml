@@ -1,61 +1,73 @@
+{{- $fullName := include "masterportal.fullName" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "masterportal.fullname" . }}
+  name: {{ $fullName }}
   labels:
-    {{- include "masterportal.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "masterportal.chart" . }}
+    app: {{ include "masterportal.name" . }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
-      {{- include "masterportal.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{ include "masterportal.name" . }}
+  replicas: {{ .Values.masterportal.replicas }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "masterportal.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        helm.sh/chart: {{ include "masterportal.chart" . }}
+        app: {{ include "masterportal.name" . }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "masterportal.serviceAccountName" . }}
+      automountServiceAccountToken: false
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.masterportal.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ $fullName }}
+          image: "{{ .Values.masterportal.image.registry }}/{{ .Values.masterportal.image.repository }}:{{ .Values.masterportal.image.tag }}"
+          imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+              containerPort: 80
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+            {{- toYaml .Values.masterportal.resources | nindent 12 }}
+          {{- if .Values.masterportal.sidecar.enabled }}
+        - name: git-sync
+          image: "{{ .Values.masterportal.sidecar.image.registry }}/{{ .Values.masterportal.sidecar.image.repository }}:{{ .Values.masterportal.sidecar.image.tag }}"
+          imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
+          securityContext:
+            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
+          args:
+            - "--repo={{ .Values.masterportal.sidecar.git.repository }}"
+            - "--branch={{ .Values.masterportal.sidecar.git.branch }}"
+            - "--root={{ .Values.masterportal.sidecar.git.path }}"
+            - "--ssh"
+            - "--dest=html"
+            - "--wait=10"
+          volumeMounts:
+            - name: git-secret
+              mountPath: /etc/git-secret
+              readOnly: true
+            - name: git-config
+              mountPath: "/git"
+              readOnly: false
+          securityContext:
+            runAsUser: 65533
+        {{- end }}
+      volumes:
+        - name: git-secret
+          secret:
+            secretName: {{ $fullName }}-git-secret
+            defaultMode: 0400
+        - name: git-config
+          emptyDir: {}
+      securityContext:
+        fsGroup: 65533
+      imagePullSecrets:
+        - name: {{ $fullName }}-gitlab-pull-secret

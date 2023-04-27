@@ -1,15 +1,26 @@
+{{- $fullName := include "masterportal.fullName" . -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "masterportal.fullname" . }}
+  name: {{ $fullName }}
   labels:
-    {{- include "masterportal.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "masterportal.chart" . }}
+    app: {{ include "masterportal.name" . }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
   selector:
-    {{- include "masterportal.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "masterportal.chart" . }}
+    app: {{ include "masterportal.name" . }}
+  {{- if not .Values.masterportal.ingress.enabled }}
+  type: NodePort
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.masterportal.ports.http.servicePort }}
+      {{- if not .Values.masterportal.ingress.enabled }}
+      nodePort: {{ .Values.masterportal.ports.http.nodePort }}
+      {{- end }}
+      targetPort: http
