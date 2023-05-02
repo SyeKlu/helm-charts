@@ -57,7 +57,6 @@ masterportal:
       tag: v3.6.5
       pullPolicy: IfNotPresent
       pullSecrets: []
-      securityContext: *defaultSecurityContext
 
     git:
       repository: https://github.com/myuser/myapp.git
