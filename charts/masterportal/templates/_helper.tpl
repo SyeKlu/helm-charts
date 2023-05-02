@@ -31,3 +31,26 @@ Create chart name and version as used by the chart label.
 {{- define "masterportal.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Common labels
+*/}}
+{{- define "masterportal.labels" -}}
+helm.sh/chart: {{ include "masterportal.chart" . }}
+{{ include "masterportal.selectorLabels" . }}
+{{- if or .Chart.AppVersion .Values.masterportal.image.tag }}
+app.kubernetes.io/version: {{ mustRegexReplaceAllLiteral "@sha.*" .Values.masterportal.image.tag "" | default .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.extraLabels }}
+{{ toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "masterportal.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "masterportal.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

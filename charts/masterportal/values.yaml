@@ -18,6 +18,9 @@ defaultSecurityContext: &defaultSecurityContext
 nameOverride: ""
 fullnameOverride: ""
 
+# Apply extra labels to common labels.
+extraLabels: {}
+
 masterportal:
   image:
     registry: docker.io

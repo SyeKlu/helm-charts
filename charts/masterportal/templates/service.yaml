@@ -4,16 +4,10 @@ kind: Service
 metadata:
   name: {{ $fullname }}
   labels:
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ include "masterportal.chart" . }}
-    app: {{ include "masterportal.name" . }}
+    {{- include "masterportal.labels" . | nindent 4 }}
 spec:
   selector:
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ include "masterportal.chart" . }}
-    app: {{ include "masterportal.name" . }}
+    {{- include "masterportal.selectorLabels" . | nindent 4 }}
   {{- if not .Values.masterportal.ingress.enabled }}
   type: NodePort
   {{- end }}

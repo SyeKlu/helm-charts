@@ -10,10 +10,7 @@ metadata:
     {{ $key }}: {{ $value | quote }}
     {{- end }}
   labels:
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    helm.sh/chart: {{ include "masterportal.chart" . }}
-    app: {{ include "masterportal.name" . }}
+    {{- include "masterportal.labels" . | nindent 4 }}
 spec:
   {{- if .Values.masterportal.ingress.tls.enabled }}
   tls:
