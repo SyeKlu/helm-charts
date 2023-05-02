@@ -28,11 +28,10 @@ masterportal:
     tag: latest
     pullPolicy: IfNotPresent
     pullSecrets: []
-
-  podSecurityContext: *defaultPodSecurityContext
-  securityContext: *defaultSecurityContext
+    securityContext: *defaultSecurityContext
 
   replicas: 1
+  podSecurityContext: *defaultPodSecurityContext
   
   ports:
     http:
@@ -58,6 +57,7 @@ masterportal:
       tag: v3.6.5
       pullPolicy: IfNotPresent
       pullSecrets: []
+      securityContext: *defaultSecurityContext
 
     git:
       repository: https://github.com/myuser/myapp.git

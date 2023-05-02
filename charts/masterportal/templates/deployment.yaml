@@ -27,7 +27,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           securityContext:
-            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
+            {{- toYaml .Values.masterportal.image.securityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: 80
@@ -42,7 +42,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           securityContext:
-            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
+            {{- toYaml .Values.masterportal.sidecar.image.securityContext | nindent 12 }}
           args:
             - "--repo={{ .Values.masterportal.sidecar.git.repository }}"
             - "--branch={{ .Values.masterportal.sidecar.git.branch }}"
