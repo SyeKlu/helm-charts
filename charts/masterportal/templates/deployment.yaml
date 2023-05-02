@@ -26,8 +26,6 @@ spec:
           imagePullSecrets:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          securityContext:
-            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: 80
