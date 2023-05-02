@@ -2,6 +2,10 @@
 
 This repository contains a collection of [Helm](https://helm.sh/) charts for deploying applications on Kubernetes. Helm is a package manager for Kubernetes that helps in managing applications by packaging them into charts, which can be versioned, shared, and deployed easily.
 
+## Disclaimer
+
+Please note that the charts in this repository are currently in alpha version and are not recommended for use in production environments.
+
 ## Prerequisites
 
 To use the charts in this repository, you need to have Helm installed on your machine. Refer to the official Helm documentation for [installation instructions](https://helm.sh/docs/intro/install/).
