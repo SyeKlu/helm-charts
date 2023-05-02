@@ -1,0 +1,10 @@
+apiVersion: v2
+appVersion: "2.32.0"
+version: 0.1.0
+name: masterportal
+description: Masterportal is an open source visualasation to display WMS and WFS Geoservices services.
+maintainers:
+  - name: Sebastian Klute
+    email: sebastian-sye@klute.dev
+sources:
+  - https://bitbucket.org/geowerkstatt-hamburg/masterportal/

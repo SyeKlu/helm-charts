@@ -1,0 +1,26 @@
+{{- $fullName := include "masterportal.fullName" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "masterportal.chart" . }}
+    app: {{ include "masterportal.name" . }}
+spec:
+  selector:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "masterportal.chart" . }}
+    app: {{ include "masterportal.name" . }}
+  {{- if not .Values.masterportal.ingress.enabled }}
+  type: NodePort
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.masterportal.ports.http.servicePort }}
+      {{- if not .Values.masterportal.ingress.enabled }}
+      nodePort: {{ .Values.masterportal.ports.http.nodePort }}
+      {{- end }}
+      targetPort: http

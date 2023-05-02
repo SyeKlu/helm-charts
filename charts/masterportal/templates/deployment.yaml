@@ -1,0 +1,79 @@
+{{- $fullName := include "masterportal.fullName" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "masterportal.chart" . }}
+    app: {{ include "masterportal.name" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{ include "masterportal.name" . }}
+  replicas: {{ .Values.masterportal.replicas }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        helm.sh/chart: {{ include "masterportal.chart" . }}
+        app: {{ include "masterportal.name" . }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.masterportal.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $fullName }}
+          image: "{{ .Values.masterportal.image.registry }}/{{ .Values.masterportal.image.repository }}:{{ .Values.masterportal.image.tag }}"
+          imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
+          {{- with .Values.masterportal.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            {{- toYaml .Values.masterportal.resources | nindent 12 }}
+          {{- if .Values.masterportal.sidecar.enabled }}
+        - name: git-sync
+          image: "{{ .Values.masterportal.sidecar.image.registry }}/{{ .Values.masterportal.sidecar.image.repository }}:{{ .Values.masterportal.sidecar.image.tag }}"
+          imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
+          {{- with .Values.masterportal.sidecar.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
+          args:
+            - "--repo={{ .Values.masterportal.sidecar.git.repository }}"
+            - "--branch={{ .Values.masterportal.sidecar.git.branch }}"
+            - "--root={{ .Values.masterportal.sidecar.git.path }}"
+            - "--ssh"
+            - "--dest=html"
+            - "--wait=10"
+          volumeMounts:
+            - name: git-secret
+              mountPath: /etc/git-secret
+              readOnly: true
+            - name: git-config
+              mountPath: "/git"
+              readOnly: false
+          securityContext:
+            runAsUser: 65533
+        {{- end }}
+      volumes:
+        - name: git-secret
+          secret:
+            secretName: {{ $fullName }}-git-secret
+            defaultMode: 0400
+        - name: git-config
+          emptyDir: {}
+      securityContext:
+        fsGroup: 65533
