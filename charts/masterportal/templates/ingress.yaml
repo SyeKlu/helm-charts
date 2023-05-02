@@ -15,9 +15,13 @@ spec:
   {{- if .Values.masterportal.ingress.ingressClassName }}
   ingressClassName: {{ .Values.masterportal.ingress.ingressClassName }}
   {{- end -}}
-  {{- with .Values.masterportal.ingress.tls }}
+  {{- if .Values.masterportal.ingress.tls.enabled }}
   tls:
-    {{- tpl (toYaml .) $ | nindent 4 }}
+    - hosts:
+        - {{ .Values.masterportal.ingress.serviceHost }}
+    {{- if .Values.masterportal.ingress.tls.secretName }}
+      secretName: {{ .Values.masterportal.ingress.tls.secretName }}
+    {{- end -}}
   {{- end }}
   rules:
   - host: {{ .Values.masterportal.serviceHost }}

@@ -46,7 +46,9 @@ masterportal:
     annotations: []
     ingressClassName: ""
     host: ""
-    tls: []
+    tls:
+        enabled: false
+        secretName: []
 
   sidecar:
     enabled: true
