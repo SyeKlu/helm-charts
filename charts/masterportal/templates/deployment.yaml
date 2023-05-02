@@ -16,6 +16,8 @@ spec:
         {{- include "masterportal.selectorLabels" . | nindent 8 }}}
     spec:
       automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.masterportal.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ $fullname }}
           image: "{{ .Values.masterportal.image.registry }}/{{ .Values.masterportal.image.repository }}:{{ .Values.masterportal.image.tag }}"
@@ -39,6 +41,8 @@ spec:
           imagePullSecrets:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          securityContext:
+            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
           args:
             - "--repo={{ .Values.masterportal.sidecar.git.repository }}"
             - "--branch={{ .Values.masterportal.sidecar.git.branch }}"
@@ -53,8 +57,6 @@ spec:
             - name: git-config
               mountPath: "/git"
               readOnly: false
-          securityContext:
-            runAsUser: 65533
         {{- end }}
       volumes:
         - name: git-secret
@@ -63,5 +65,3 @@ spec:
             defaultMode: 0400
         - name: git-config
           emptyDir: {}
-      securityContext:
-        fsGroup: 65533
