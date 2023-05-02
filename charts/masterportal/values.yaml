@@ -2,8 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-projectname: &projectName ""
-
 defaultPodSecurityContext: &defaultPodSecurityContext
   runAsNonRoot: true
   runAsUser: 1000
@@ -41,7 +39,7 @@ masterportal:
   ingress:
     enabled: true
     appRootAnnotation: nginx.ingress.kubernetes.io/app-root
-    appRootTraget: /*projectName
+    appRootTraget: /projectName
     annotations:
     host: ""
     tls:
