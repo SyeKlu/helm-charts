@@ -14,10 +14,10 @@ metadata:
 spec:
   {{- if .Values.masterportal.ingress.tls.enabled }}
   tls:
-    - hosts:
-        - {{ .Values.masterportal.ingress.host }}
+  - hosts:
+    - {{ .Values.masterportal.ingress.host }}
     {{- if .Values.masterportal.ingress.tls.secretName }}
-      secretName: {{ .Values.masterportal.ingress.tls.secretName }}
+    secretName: {{ .Values.masterportal.ingress.tls.secretName }}
     {{- end -}}
   {{- end }}
   rules:
