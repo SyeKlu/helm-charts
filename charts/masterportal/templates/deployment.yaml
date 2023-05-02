@@ -1,8 +1,8 @@
-{{- $fullName := include "masterportal.fullName" . -}}
+{{- $fullname := include "masterportal.fullname" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullname }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -27,7 +27,7 @@ spec:
       securityContext:
         {{- toYaml .Values.masterportal.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ $fullName }}
+        - name: {{ $fullname }}
           image: "{{ .Values.masterportal.image.registry }}/{{ .Values.masterportal.image.repository }}:{{ .Values.masterportal.image.tag }}"
           imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
           {{- with .Values.masterportal.image.pullSecrets }}
@@ -71,7 +71,7 @@ spec:
       volumes:
         - name: git-secret
           secret:
-            secretName: {{ $fullName }}-git-secret
+            secretName: {{ $fullname }}-git-secret
             defaultMode: 0400
         - name: git-config
           emptyDir: {}

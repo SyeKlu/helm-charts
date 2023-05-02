@@ -1,8 +1,8 @@
-{{- $fullName := include "masterportal.fullName" . -}}
+{{- $fullname := include "masterportal.fullname" . -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullname }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
