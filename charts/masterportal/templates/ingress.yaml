@@ -1,14 +1,14 @@
 {{- if .Values.masterportal.ingress.enabled -}}
-{{- $fullName := include "masterportal.fullName" -}}
+{{- $fullName := include "masterportal.fullName" . -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   annotations:
     {{ .Values.masterportal.ingress.appRootAnnotation}}: {{ .Values.masterportal.ingress.appRootTraget}}
-    {{- if .Values.masterportal.ingress.annotations }}
-    {{- toYaml .Values.masterportal.ingress.annotations }}
-    {{ end }}
+    {{- range $key, $value := .Values.masterportal.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
