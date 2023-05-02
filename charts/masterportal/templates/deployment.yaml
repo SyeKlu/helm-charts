@@ -16,8 +16,6 @@ spec:
         {{- include "masterportal.selectorLabels" . | nindent 8 }}}
     spec:
       automountServiceAccountToken: false
-      securityContext:
-        {{- toYaml .Values.masterportal.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ $fullname }}
           image: "{{ .Values.masterportal.image.registry }}/{{ .Values.masterportal.image.repository }}:{{ .Values.masterportal.image.tag }}"
