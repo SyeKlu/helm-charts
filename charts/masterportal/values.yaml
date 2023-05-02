@@ -44,10 +44,9 @@ masterportal:
     appRootAnnotation: nginx.ingress.kubernetes.io/app-root
     appRootTraget: /projectName
     annotations: []
+    ingressClassName: ""
     host: ""
-    tls:
-      enabled: false
-      secretName: []
+    tls: []
 
   sidecar:
     enabled: true

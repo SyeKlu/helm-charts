@@ -12,13 +12,13 @@ metadata:
   labels:
     {{- include "masterportal.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.masterportal.ingress.tls.enabled }}
+  {{- if and $ingressSupportsIngressClassName .Values.masterportal.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.masterportal.ingress.ingressClassName }}
+  {{- end -}}
+  {{- with .Values.masterportal.ingress.tls }}
   tls:
-  - hosts:
-    - {{ .Values.masterportal.ingress.host }}
-    {{- if .Values.masterportal.ingress.tls.secretName }}
-    secretName: {{ .Values.masterportal.ingress.tls.secretName }}
-    {{- end -}}
+    {{- tpl (toYaml .) $ | nindent 4 }}
+  {{- end }}
   {{- end }}
   rules:
   - host: {{ .Values.masterportal.serviceHost }}
