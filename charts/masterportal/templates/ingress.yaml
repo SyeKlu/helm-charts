@@ -1,11 +1,10 @@
 {{- if .Values.masterportal.ingress.enabled -}}
-{{- $fullname := include "masterportal.fullname" . -}}
+{{- $fullName := include "masterportal.fullname" . -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $fullname }}
+  name: {{ $fullName }}
   annotations:
-    {{ .Values.masterportal.ingress.appRootAnnotation}}: {{ .Values.masterportal.ingress.appRootTraget}}
     {{- range $key, $value := .Values.masterportal.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
@@ -31,7 +30,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name:  {{ $fullname }}
+            name:  {{ $fullName }}
             port:
               number: 80
 {{- end -}}

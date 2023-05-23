@@ -1,25 +1,33 @@
-{{- $fullname := include "masterportal.fullname" . -}}
+{{- $fullName := include "masterportal.fullname" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullname }}
+  name: {{ $fullName }}
   labels:
-    {{- include "masterportal.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "masterportal.chart" . }}
+    app: {{ include "masterportal.name" . }}
 spec:
   selector:
     matchLabels:
-      {{- include "masterportal.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{ include "masterportal.name" . }}
   replicas: {{ .Values.masterportal.replicas }}
   template:
     metadata:
       labels:
-        {{- include "masterportal.selectorLabels" . | nindent 8 }}}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        helm.sh/chart: {{ include "masterportal.chart" . }}
+        app: {{ include "masterportal.name" . }}
     spec:
       automountServiceAccountToken: false
       securityContext:
         {{- toYaml .Values.masterportal.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ $fullname }}
+        - name: {{ $fullName }}
           image: "{{ .Values.masterportal.image.registry }}/{{ .Values.masterportal.image.repository }}:{{ .Values.masterportal.image.tag }}"
           imagePullPolicy: {{ .Values.masterportal.image.pullPolicy | quote }}
           {{- with .Values.masterportal.image.pullSecrets }}
@@ -28,7 +36,17 @@ spec:
           {{- end }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
+          volumeMounts:
+          - name: masterportal-config-dir
+            mountPath: /usr/share/nginx
+          - name: cache-nginx
+            mountPath: /var/cache/nginx
+          - name: tmp-nginx
+            mountPath: /tmp/nginx
+          - name: conf 
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
           resources:
             {{- toYaml .Values.masterportal.resources | nindent 12 }}
           {{- if .Values.masterportal.sidecar.enabled }}
@@ -39,13 +57,16 @@ spec:
           imagePullSecrets:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          securityContext:
+            {{- toYaml .Values.masterportal.securityContext | nindent 12 }}
           args:
             - "--repo={{ .Values.masterportal.sidecar.git.repository }}"
             - "--branch={{ .Values.masterportal.sidecar.git.branch }}"
             - "--root={{ .Values.masterportal.sidecar.git.path }}"
             - "--ssh"
             - "--dest=html"
-            - "--wait=10"
+            - "--wait=60"
+            - "--change-permissions=0755"
           volumeMounts:
             - name: git-secret
               mountPath: /etc/git-secret
@@ -57,7 +78,16 @@ spec:
       volumes:
         - name: git-secret
           secret:
-            secretName: {{ $fullname }}-git-secret
+            secretName: {{ $fullName }}-git-secret
             defaultMode: 0400
         - name: git-config
           emptyDir: {}
+        - name: masterportal-config-dir
+          emptyDir: {}
+        - name: tmp-nginx
+          emptyDir: {}
+        - name: cache-nginx
+          emptyDir: {}
+        - name: conf
+          configMap: 
+            name: {{ $fullName }}-nginx-conf
